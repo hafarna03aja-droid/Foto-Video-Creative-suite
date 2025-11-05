@@ -152,7 +152,7 @@ export const VideoGeneration: React.FC<VideoGenerationProps> = ({ initialImage, 
             {(['16:9', '9:16'] as VideoAspectRatio[]).map((ar) => (
               <button key={ar} type="button" onClick={() => setAspectRatio(ar)} disabled={isLoading}
                 className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${aspectRatio === ar ? 'bg-indigo-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}>
-                {ar === '16:9' ? 'Lanskap' : 'Potret'}
+                {ar === '16:9' ? 'Lanskap (16∶9)' : 'Potret (9∶16)'}
               </button>
             ))}
           </div>
