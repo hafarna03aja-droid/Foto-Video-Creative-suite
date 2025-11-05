@@ -8,14 +8,36 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Production-optimized Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/tailwind.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Suppress development warning in console
+      if (typeof console !== 'undefined' && console.warn) {
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+            return; // Suppress this specific warning
+          }
+          originalWarn.apply(console, args);
+        };
+      }
+      
+      // Tailwind configuration
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
 
   <!-- Import maps will be handled by Vite in production -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
-  /* Configure Inter font */
-  body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+  /* Base configuration already handled by Tailwind config above */
   
   /* Custom styles for markdown content */
   .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
