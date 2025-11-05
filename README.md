@@ -12,9 +12,33 @@ View your app in AI Studio: https://ai.studio/apps/drive/17e0atqFOwjCj3KgCflSvaM
 
 **Prerequisites:**  Node.js
 
-
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+
+2. Copy environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. Set the `GEMINI_API_KEY` in `.env.local` to your Gemini API key
+
+4. Run the app:
+   ```bash
+   npm run dev
+   ```
+
+## Deploy to Vercel
+
+### Quick Deploy
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/hafarna03aja-droid/Foto-Video-Creative-suite)
+
+### Manual Deploy
+1. Fork/clone this repository
+2. Push to your GitHub repository
+3. Connect to [Vercel](https://vercel.com)
+4. Add environment variable `GEMINI_API_KEY` in Vercel dashboard
+5. Deploy automatically
+
+📖 **Detailed deployment guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md)
