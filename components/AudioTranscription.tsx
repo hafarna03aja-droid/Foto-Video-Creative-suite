@@ -1,94 +1,99 @@
 
 import React, { useState, useRef, useCallback } from 'react';
-import * as geminiService from '../services/geminiService';
-import { encode } from '../utils/helpers';
-import type { LiveSession, LiveServerMessage, Blob } from '@google/genai';
-
+import { BackendService } from '../services/backendService';
 
 export const AudioTranscription: React.FC = () => {
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [transcription, setTranscription] = useState<string>('');
     const [error, setError] = useState<string>('');
 
-    const sessionRef = useRef<LiveSession | null>(null);
     const mediaStreamRef = useRef<MediaStream | null>(null);
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
-    const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-    const transcriptionRef = useRef<string>('');
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const transcriptionIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const stopRecording = useCallback(() => {
-        if (sessionRef.current) {
-            sessionRef.current.close();
-            sessionRef.current = null;
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
         }
         if (mediaStreamRef.current) {
             mediaStreamRef.current.getTracks().forEach(track => track.stop());
             mediaStreamRef.current = null;
         }
-        if (scriptProcessorRef.current) {
-            scriptProcessorRef.current.disconnect();
-            scriptProcessorRef.current = null;
-        }
-        if (mediaStreamSourceRef.current) {
-            mediaStreamSourceRef.current.disconnect();
-            mediaStreamSourceRef.current = null;
-        }
-        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-            audioContextRef.current.close();
-            audioContextRef.current = null;
+        if (transcriptionIntervalRef.current) {
+            clearInterval(transcriptionIntervalRef.current);
+            transcriptionIntervalRef.current = null;
         }
         setIsRecording(false);
     }, []);
-    
-    const handleMessage = (message: LiveServerMessage) => {
-        if (message.serverContent?.inputTranscription) {
-            const text = message.serverContent.inputTranscription.text;
-            transcriptionRef.current += text;
-            setTranscription(transcriptionRef.current);
+    const handleAudioDataAvailable = useCallback((event: BlobEvent) => {
+        if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
         }
-    };
+    }, []);
+
+    const processAudioChunks = useCallback(async () => {
+        if (audioChunksRef.current.length === 0) return;
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        audioChunksRef.current = []; // Clear chunks
+
+        try {
+            // Convert blob to file for upload
+            const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
+
+            // Upload the audio file first
+            const uploadResponse = await BackendService.uploadFile(audioFile);
+            
+            // Then transcribe using the uploaded file URL
+            const transcriptResponse = await BackendService.transcribeAudio(uploadResponse.url);
+            
+            if (transcriptResponse.trim()) {
+                setTranscription(prev => prev + ' ' + transcriptResponse);
+            }
+        } catch (error) {
+            console.error('Transcription error:', error);
+            setError('Gagal mentranskrip audio');
+        }
+    }, []);
     
     const startRecording = async () => {
         if (isRecording) return;
         setIsRecording(true);
         setError('');
-        transcriptionRef.current = '';
         setTranscription('');
+        audioChunksRef.current = [];
     
         try {
-            mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
-    
-            const sessionPromise = geminiService.startTranscriptionSession(handleMessage);
-            sessionRef.current = await sessionPromise;
-    
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
-            mediaStreamSourceRef.current = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
-            scriptProcessorRef.current = audioContextRef.current.createScriptProcessor(4096, 1, 1);
-    
-            scriptProcessorRef.current.onaudioprocess = (audioProcessingEvent) => {
-                const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
-                const l = inputData.length;
-                const int16 = new Int16Array(l);
-                for (let i = 0; i < l; i++) {
-                    int16[i] = inputData[i] * 32768;
+            mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    sampleRate: 16000,
+                    channelCount: 1,
+                    echoCancellation: true,
+                    noiseSuppression: true 
+                } 
+            });
+
+            mediaRecorderRef.current = new MediaRecorder(mediaStreamRef.current, {
+                mimeType: 'audio/webm;codecs=opus'
+            });
+
+            mediaRecorderRef.current.addEventListener('dataavailable', handleAudioDataAvailable);
+            
+            mediaRecorderRef.current.addEventListener('stop', () => {
+                processAudioChunks();
+            });
+
+            // Start recording and set up interval for periodic transcription
+            mediaRecorderRef.current.start(1000); // Collect data every 1 second
+
+            // Process audio chunks every 3 seconds
+            transcriptionIntervalRef.current = setInterval(() => {
+                if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                    mediaRecorderRef.current.requestData();
                 }
-                const pcmBlob: Blob = {
-                    data: encode(new Uint8Array(int16.buffer)),
-                    mimeType: 'audio/pcm;rate=16000',
-                };
-    
-                sessionPromise.then(session => {
-                    session.sendRealtimeInput({ media: pcmBlob });
-                }).catch(err => {
-                    console.error("Error sending audio data:", err);
-                    stopRecording();
-                });
-            };
-    
-            mediaStreamSourceRef.current.connect(scriptProcessorRef.current);
-            scriptProcessorRef.current.connect(audioContextRef.current.destination);
-    
+            }, 3000);
+
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal memulai rekaman.');
             console.error(err);

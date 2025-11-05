@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import * as geminiService from '../services/geminiService';
+import { BackendService } from '../services/backendService';
 import { decode, decodeAudioData, fileToBase64, createWavBlob } from '../utils/helpers';
 import { Spinner } from './Spinner';
 import { DownloadIcon } from './Icons';
@@ -137,15 +137,13 @@ export const TextToSpeech: React.FC<TextToSpeechProps> = ({ lastCreation, onCrea
       }
       const finalPrompt = instruction + text;
 
-      const base64Audio = await geminiService.generateSpeech(finalPrompt, voice);
-      onCreationComplete({ type: 'tts', prompt: text, data: base64Audio });
-      const decodedBytes = decode(base64Audio);
-
-      // Create WAV for download
-      const wavBlob = createWavBlob(decodedBytes, 1, 24000, 16);
-      setAudioUrl(URL.createObjectURL(wavBlob));
-      
-      await playAudio(decodedBytes);
+      const audioUrl = await BackendService.generateAudio(finalPrompt, {
+        voice,
+        speed: 1.0,
+        language: 'id'
+      });
+      onCreationComplete({ type: 'tts', prompt: text, data: audioUrl });
+      setAudioUrl(audioUrl);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.');
@@ -185,8 +183,11 @@ export const TextToSpeech: React.FC<TextToSpeechProps> = ({ lastCreation, onCrea
            }
         }
         
-        const result = await geminiService.generateNarrationForMedia(lastCreation.prompt, imagePayload);
-        setText(result.text);
+        const narrationText = await BackendService.generateText(`Buat narasi untuk ${lastCreation.type}: ${lastCreation.prompt}`, {
+          maxTokens: 500,
+          temperature: 0.8
+        });
+        setText(narrationText);
 
     } catch(err) {
         setError(err instanceof Error ? `Gagal membuat narasi: ${err.message}`: 'Gagal membuat narasi.');

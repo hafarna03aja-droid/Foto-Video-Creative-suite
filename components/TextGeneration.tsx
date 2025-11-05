@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import * as geminiService from '../services/geminiService';
+import { BackendService } from '../services/backendService';
 import { Spinner } from './Spinner';
 import type { HistoryItem } from '../types';
 
@@ -31,14 +31,17 @@ export const TextGeneration: React.FC<TextGenerationProps> = ({ onCreationComple
     setError('');
     setResponseHtml('');
     try {
-      const result = await geminiService.generateText(prompt, model, useThinking);
+      const resultText = await BackendService.generateText(prompt, {
+        maxTokens: 1000,
+        temperature: 0.7
+      });
       if (typeof marked !== 'undefined') {
-        setResponseHtml(marked.parse(result.text));
+        setResponseHtml(marked.parse(resultText));
       } else {
         // Fallback to pre-wrap if marked is not loaded
-        setResponseHtml(`<p style="white-space: pre-wrap;">${result.text}</p>`);
+        setResponseHtml(`<p style="white-space: pre-wrap;">${resultText}</p>`);
       }
-      onCreationComplete({ type: 'text', prompt, data: result.text });
+      onCreationComplete({ type: 'text', prompt, data: resultText });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.');
     } finally {

@@ -1,12 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🎥 Foto & Video Creative Suite
 
-# Run and deploy your AI Studio app
+**Professional AI-Powered Content Creation Platform**
 
-This contains everything you need to run your app locally.
+A modern web application that integrates Google Gemini's power to create text, images, videos, and audio automatically. Built with cutting-edge technology for content creators, digital marketers, and anyone who wants to generate creative materials with ease.
 
-View your app in AI Studio: https://ai.studio/apps/drive/17e0atqFOwjCj3KgCflSvaM-X9wqdou8s
+## 🏗️ Architecture Overview
+
+### **Production-Ready Backend Architecture**
+- **Express.js Server**: RESTful API with TypeScript
+- **JWT Authentication**: Secure user authentication with refresh tokens
+- **Rate Limiting**: Built-in protection against abuse
+- **Server-Side AI Integration**: Secure API key management
+- **File Upload Support**: Multer integration for media handling
+- **Comprehensive Logging**: Winston-based structured logging
+- **Docker Ready**: Containerized deployment support
+
+### **Modern Frontend Stack**
+- **React 18 + TypeScript**: Type-safe component architecture
+- **Vite Build System**: Fast development and optimized production builds
+- **Backend Service Integration**: Centralized API client with auto token refresh
+- **Authentication Wrapper**: Seamless user authentication flow
 
 ## Run Locally
 

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { AuthWrapper } from './components/AuthWrapper';
 import { TextGeneration } from './components/TextGeneration';
 import { ImageGeneration } from './components/ImageGeneration';
 import { ImageEditing } from './components/ImageEditing';
@@ -194,7 +195,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
+    <AuthWrapper>
+      <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
       <ApiKeyModal
         isOpen={isApiKeyModalOpen}
         onClose={() => setIsApiKeyModalOpen(false)}
@@ -233,7 +235,8 @@ const App: React.FC = () => {
       <footer className="text-center p-4 text-gray-500 text-sm">
         <p>by 24 Learning Centre</p>
       </footer>
-    </div>
+      </div>
+    </AuthWrapper>
   );
 };
 

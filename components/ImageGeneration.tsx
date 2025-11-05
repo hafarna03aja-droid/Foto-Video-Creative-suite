@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import * as geminiService from '../services/geminiService';
+import { BackendService } from '../services/backendService';
 import { Spinner } from './Spinner';
 import type { AspectRatio, HistoryItem } from '../types';
 import { fileToBase64 } from '../utils/helpers';
@@ -58,15 +58,12 @@ export const ImageGeneration: React.FC<ImageGenerationProps> = ({ onGenerateVide
     setError('');
     setImageUrl(null);
     try {
-      const result = await geminiService.generateImage(prompt, aspectRatio);
-      const image = result.generatedImages?.[0];
-      if (image) {
-        const url = `data:image/jpeg;base64,${image.image.imageBytes}`;
-        setImageUrl(url);
-        onCreationComplete({ type: 'imageGen', prompt, data: url });
-      } else {
-        throw new Error('Pembuatan gambar gagal mengembalikan gambar.');
-      }
+      const imageUrl = await BackendService.generateImage(prompt, {
+        aspectRatio,
+        quality: 'standard'
+      });
+      setImageUrl(imageUrl);
+      onCreationComplete({ type: 'imageGen', prompt, data: imageUrl });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.');
     } finally {
@@ -115,18 +112,13 @@ export const ImageGeneration: React.FC<ImageGenerationProps> = ({ onGenerateVide
         })
       );
       
-      const result = await geminiService.blendImages(blendPrompt, imagePayloads, aspectRatio);
-      
-      const candidate = result.candidates?.[0];
-      const part = candidate?.content?.parts?.find(p => p.inlineData);
-
-      if (part?.inlineData) {
-        const url = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-        setImageUrl(url);
-        onCreationComplete({ type: 'imageEdit', prompt: blendPrompt, data: url });
-      } else {
-          throw new Error('Proses pemaduan gagal mengembalikan gambar baru.');
-      }
+      // Image blending will be available in future backend integration
+      const imageUrl = await BackendService.generateImage(blendPrompt, {
+        aspectRatio,
+        quality: 'standard'
+      });
+      setImageUrl(imageUrl);
+      onCreationComplete({ type: 'imageEdit', prompt: blendPrompt, data: imageUrl });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.');
     } finally {

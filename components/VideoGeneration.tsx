@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import * as geminiService from '../services/geminiService';
+import { BackendService } from '../services/backendService';
 import { Spinner } from './Spinner';
 import { fileToBase64 } from '../utils/helpers';
 import type { VideoAspectRatio, HistoryItem } from '../types';
@@ -100,7 +100,10 @@ export const VideoGeneration: React.FC<VideoGenerationProps> = ({ initialImage, 
         const base64 = await fileToBase64(image.file);
         imagePayload = { base64, mimeType: image.file.type };
       }
-      const resultUrl = await geminiService.generateVideo(prompt, aspectRatio, imagePayload);
+      const resultUrl = await BackendService.generateVideo(prompt, {
+        duration: 5,
+        quality: 'standard'
+      });
       setVideoUrl(resultUrl);
       onCreationComplete({ type: 'videoGen', prompt, data: resultUrl });
     } catch (err) {
