@@ -10,8 +10,8 @@
     "start": "vite preview --port 4173"
   },
   "dependencies": {
-    "react": "^19.2.0",
     "@google/genai": "^1.28.0",
+    "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {

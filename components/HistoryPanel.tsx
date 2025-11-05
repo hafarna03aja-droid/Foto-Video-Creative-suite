@@ -121,8 +121,14 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, onClose, ite
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+      
+      // Safely remove the link after a short delay
+      setTimeout(() => {
+        if (link && link.parentNode === document.body) {
+          document.body.removeChild(link);
+        }
+        URL.revokeObjectURL(link.href);
+      }, 100);
     } else {
         console.error("Could not create blob for download.");
     }
