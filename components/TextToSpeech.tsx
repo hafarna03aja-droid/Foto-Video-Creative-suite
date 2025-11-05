@@ -15,7 +15,15 @@ const availableVoices = [
 ];
 
 const availableIntonations = ['Netral', 'Ceria', 'Sedih', 'Bersemangat', 'Profesional', 'Santai'];
-const availableAccents = ['Nasional', 'Jawa', 'Sunda', 'Tegal'];
+const availableAccents = [
+  'Nasional', 
+  'Jawa', 
+  'Sunda', 
+  'Tegal'
+];
+
+// Debug: log to ensure correct text
+console.log('Available accents:', availableAccents);
 
 
 interface TextToSpeechProps {
@@ -275,9 +283,9 @@ export const TextToSpeech: React.FC<TextToSpeechProps> = ({ lastCreation, onCrea
                 disabled={isLoading || isPlaying || isNarrating}
                 className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               >
-                {availableAccents.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
+                {availableAccents.map((accent) => (
+                  <option key={accent} value={accent}>
+                    {accent}
                   </option>
                 ))}
               </select>

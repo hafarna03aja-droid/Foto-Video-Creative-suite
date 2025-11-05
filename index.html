@@ -39,6 +39,25 @@
 <style>
   /* Base configuration already handled by Tailwind config above */
   
+  /* Ensure proper text rendering for Indonesian text */
+  body, select, option, input, textarea {
+    font-feature-settings: "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Specific styling for select elements to prevent text issues */
+  select {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+  }
+  
+  option {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+  }
+  
   /* Custom styles for markdown content */
   .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
     color: #a5b4fc; /* indigo-300 */
