@@ -5,9 +5,16 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { config } from '@/config/environment.js';
 import { logger } from '@/utils/logger.js';
-import { errorHandler } from '@/middleware/errorHandler.js';
+import { errorHandler, notFoundHandler } from '@/middleware/errorHandler.js';
 import { requestLogger } from '@/middleware/requestLogger.js';
 import { authenticateToken } from '@/middleware/auth.js';
+import { 
+  responseTime, 
+  requestSizeLimiter, 
+  apiVersion, 
+  corsPreflightCache,
+  memoryCache 
+} from '@/middleware/performance.js';
 
 // Route imports
 import authRoutes from '@/routes/auth.js';
@@ -38,13 +45,19 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
+// CORS configuration with preflight caching
+app.use(corsPreflightCache(86400)); // 24 hours
 app.use(cors({
   origin: config.CORS_ORIGINS.split(','),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
 }));
+
+// Performance middleware
+app.use(responseTime);
+app.use(requestSizeLimiter(50 * 1024 * 1024)); // 50MB limit
+app.use(apiVersion('1.0.0'));
 
 // Compression and parsing
 app.use(compression());
@@ -68,8 +81,14 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
-// Routes
-app.use('/api/health', healthRoutes);
+// Routes with caching
+app.use('/api/health', 
+  memoryCache({ 
+    ttl: 30, // 30 seconds cache for health checks
+    condition: (req) => req.path === '/' || req.path === '/live'
+  }), 
+  healthRoutes
+);
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', authenticateToken, aiRoutes);
 app.use('/api/user', authenticateToken, userRoutes);
@@ -81,14 +100,8 @@ app.use('/uploads', express.static('uploads', {
   etag: true,
 }));
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    path: req.originalUrl,
-    method: req.method,
-  });
-});
+// 404 handler for unmatched routes
+app.use('*', notFoundHandler);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
