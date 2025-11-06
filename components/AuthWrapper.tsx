@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BackendService, TokenManager } from '../services/backendService';
+import { DemoAuthHelper } from '../services/demoAuthHelper';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -26,6 +27,14 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           const userData = TokenManager.getUser();
           setUser(userData);
           setIsAuthenticated(true);
+        } else {
+          // Try demo auto-login
+          const autoLoginSuccess = await DemoAuthHelper.ensureDemoLogin();
+          if (autoLoginSuccess) {
+            const userData = TokenManager.getUser();
+            setUser(userData);
+            setIsAuthenticated(true);
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -83,9 +92,19 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             <p className="mb-4 text-gray-600">Backend authentication is being set up.</p>
             <p className="mb-4 text-gray-600">For now, you can continue without login:</p>
             <button
-              onClick={() => {
-                setIsAuthenticated(true);
-                setUser({ id: 'demo', email: 'demo@example.com', name: 'Demo User', role: 'user' });
+              onClick={async () => {
+                try {
+                  setIsLoading(true);
+                  await DemoAuthHelper.manualDemoLogin();
+                  const userData = TokenManager.getUser();
+                  setUser(userData);
+                  setIsAuthenticated(true);
+                } catch (error) {
+                  console.error('Manual demo login failed:', error);
+                  alert('Login demo gagal. Coba lagi nanti.');
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
             >

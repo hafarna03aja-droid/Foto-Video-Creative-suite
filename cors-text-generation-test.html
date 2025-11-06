@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 CORS Test - Text Generation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 4px solid #4ade80;
+        }
+        button {
+            background: linear-gradient(45deg, #4ade80, #22d3ee);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
+        }
+        button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #4ade80;
+        }
+        .error {
+            border-left: 4px solid #ef4444;
+        }
+        .warning {
+            border-left: 4px solid #f59e0b;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin: 10px 0;
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-healthy { background: #4ade80; }
+        .status-error { background: #ef4444; }
+        .status-loading { 
+            background: #f59e0b; 
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 CORS & Text Generation Test</h1>
+        <p style="text-align: center; opacity: 0.9;">Test koneksi dan fitur text generation Foto Video Creative Suite</p>
+
+        <div class="test-section">
+            <h3>🏥 Backend Status Check</h3>
+            <button onclick="checkBackendStatus()">Check Backend Health</button>
+            <div id="status-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔐 Authentication Test</h3>
+            <input type="email" id="email" placeholder="Email (test@example.com)" value="test@example.com">
+            <input type="password" id="password" placeholder="Password" value="test123">
+            <button onclick="testAuth()">Test Login</button>
+            <div id="auth-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🤖 Text Generation Test</h3>
+            <textarea id="prompt" rows="3" placeholder="Masukkan prompt untuk generate text...">Tulis sebuah puisi pendek tentang teknologi AI yang membantu manusia</textarea>
+            <button onclick="testTextGeneration()" id="generate-btn">Generate Text</button>
+            <div id="generation-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 System Status</h3>
+            <div id="system-status">
+                <div><span class="status-indicator status-loading"></span>Checking systems...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://foto-video-creative-suite-backend.vercel.app/api';
+        let authToken = null;
+
+        // Auto-check status on load
+        window.onload = () => {
+            checkBackendStatus();
+            updateSystemStatus();
+        };
+
+        async function checkBackendStatus() {
+            const resultDiv = document.getElementById('status-result');
+            resultDiv.textContent = '🔄 Checking backend status...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/health/detailed`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `✅ Backend Status: ${data.data.status.toUpperCase()}
+                    
+📊 Services Status:
+${data.data.services.map(service => 
+    `• ${service.name}: ${service.status} - ${service.message}`
+).join('\n')}
+
+📈 System Info:
+• Environment: ${data.data.environment}
+• Uptime: ${data.data.uptime}s
+• Response Time: ${data.data.responseTime}ms`;
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.textContent = `❌ Backend Error: ${data.message}`;
+                    resultDiv.classList.add('error');
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ CORS/Connection Error: ${error.message}\n\nIni menunjukkan masalah CORS atau koneksi ke backend.`;
+                resultDiv.classList.add('error');
+            }
+        }
+
+        async function testAuth() {
+            const resultDiv = document.getElementById('auth-result');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            resultDiv.textContent = '🔄 Testing authentication...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    authToken = data.data.accessToken;
+                    resultDiv.innerHTML = `✅ Login Successful!
+                    
+👤 User Info:
+• ID: ${data.data.user.id}
+• Name: ${data.data.user.name}
+• Email: ${data.data.user.email}
+• Role: ${data.data.user.role}
+
+🔑 Token: ${authToken.substring(0, 50)}...`;
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.innerHTML = `⚠️ Auth Response (Status: ${response.status}):
+${JSON.stringify(data, null, 2)}
+
+📋 Note: Status 401/404 adalah normal jika user belum register. Yang penting CORS working!`;
+                    resultDiv.classList.add('warning');
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ CORS Error in Auth: ${error.message}`;
+                resultDiv.classList.add('error');
+            }
+        }
+
+        async function testTextGeneration() {
+            const resultDiv = document.getElementById('generation-result');
+            const generateBtn = document.getElementById('generate-btn');
+            const prompt = document.getElementById('prompt').value;
+            
+            if (!prompt.trim()) {
+                resultDiv.textContent = '❌ Please enter a prompt';
+                resultDiv.classList.add('error');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '🔄 Generating...';
+            resultDiv.textContent = '🤖 Generating text with Gemini AI...';
+            resultDiv.className = 'result';
+
+            try {
+                // Try without auth first (to test CORS)
+                const response = await fetch(`${BACKEND_URL}/ai/generate/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                    },
+                    body: JSON.stringify({ 
+                        prompt: prompt,
+                        maxTokens: 200,
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `🎉 Text Generation SUCCESS!
+                    
+📝 Generated Text:
+${data.data.generatedText}
+
+📊 Generation Info:
+• Model: ${data.data.model}
+• Tokens: ${data.data.tokenCount}
+• Finish Reason: ${data.data.finishReason}`;
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.innerHTML = `📋 Response (Status: ${response.status}):
+${JSON.stringify(data, null, 2)}
+
+${response.status === 401 ? 
+'🔑 401 = Authentication required (CORS working!)' : 
+response.status === 403 ?
+'🚫 403 = Forbidden (CORS working, check API key)' :
+'⚠️ Check backend logs for details'}`;
+                    resultDiv.classList.add(response.status === 401 || response.status === 403 ? 'warning' : 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ CORS/Connection Error: ${error.message}
+
+🔧 Possible causes:
+• CORS configuration not updated
+• Backend not deployed
+• Network connectivity issues
+
+💡 Check: https://foto-video-creative-suite-backend.vercel.app/api/health`;
+                resultDiv.classList.add('error');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Text';
+            }
+        }
+
+        async function updateSystemStatus() {
+            const statusDiv = document.getElementById('system-status');
+            
+            const checks = [
+                { name: 'Backend Health', url: `${BACKEND_URL}/health` },
+                { name: 'CORS Configuration', url: `${BACKEND_URL}/health/detailed` },
+                { name: 'Frontend Connectivity', test: () => true }
+            ];
+
+            let statusHTML = '';
+            for (const check of checks) {
+                try {
+                    if (check.test) {
+                        statusHTML += `<div><span class="status-indicator status-healthy"></span>${check.name}: OK</div>`;
+                    } else {
+                        const response = await fetch(check.url);
+                        if (response.ok) {
+                            statusHTML += `<div><span class="status-indicator status-healthy"></span>${check.name}: OK</div>`;
+                        } else {
+                            statusHTML += `<div><span class="status-indicator status-error"></span>${check.name}: Error ${response.status}</div>`;
+                        }
+                    }
+                } catch (error) {
+                    statusHTML += `<div><span class="status-indicator status-error"></span>${check.name}: Failed</div>`;
+                }
+            }
+            
+            statusDiv.innerHTML = statusHTML;
+        }
+    </script>
+</body>
+</html>
