@@ -1,9 +1,9 @@
 // API Configuration
 const getApiBaseUrl = () => {
   try {
-    return (import.meta as any)?.env?.VITE_API_BASE_URL || 'https://backend.hafarnas-projects.vercel.app/api';
+    return (import.meta as any)?.env?.VITE_API_BASE_URL || 'https://foto-video-creative-suite-backend.vercel.app/api';
   } catch {
-    return 'https://backend.hafarnas-projects.vercel.app/api';
+    return 'https://foto-video-creative-suite-backend.vercel.app/api';
   }
 };
 const API_BASE_URL = getApiBaseUrl();

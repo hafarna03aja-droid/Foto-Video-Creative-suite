@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - Foto Video Creative Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+        }
+        button {
+            background-color: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover {
+            background-color: #0284c7;
+        }
+        .result {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            border-left: 4px solid #10b981;
+        }
+        .error {
+            border-left: 4px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 CORS Verification Test</h1>
+    <p>Test koneksi CORS antara frontend dan backend Foto Video Creative Suite</p>
+
+    <div class="test-section">
+        <h3>Backend Health Check</h3>
+        <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>CORS Preflight Test</h3>
+        <button onclick="testCORS()">Test CORS Headers</button>
+        <div id="cors-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Authentication Test</h3>
+        <button onclick="testAuthEndpoint()">Test Auth Endpoint</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://foto-video-creative-suite-backend.vercel.app';
+
+        async function testHealthEndpoint() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.textContent = 'Testing...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = `✅ SUCCESS\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.textContent = `❌ ERROR\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    resultDiv.classList.add('error');
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ CORS ERROR\nError: ${error.message}\nThis indicates CORS is blocking the request.`;
+                resultDiv.classList.add('error');
+            }
+        }
+
+        async function testCORS() {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.textContent = 'Testing CORS headers...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type, Authorization'
+                    }
+                });
+
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                };
+
+                resultDiv.textContent = `✅ CORS Headers:\n${JSON.stringify(corsHeaders, null, 2)}`;
+                resultDiv.classList.add('success');
+            } catch (error) {
+                resultDiv.textContent = `❌ CORS Test Failed\nError: ${error.message}`;
+                resultDiv.classList.add('error');
+            }
+        }
+
+        async function testAuthEndpoint() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.textContent = 'Testing auth endpoint...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: 'test-token' })
+                });
+
+                const data = await response.json();
+                
+                resultDiv.textContent = `Response received (Status: ${response.status}):\n${JSON.stringify(data, null, 2)}`;
+                
+                if (response.status === 401 || response.status === 403) {
+                    resultDiv.textContent += '\n\n✅ This is expected - CORS is working, auth is just rejecting invalid token.';
+                    resultDiv.classList.add('success');
+                } else if (response.ok) {
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.classList.add('error');
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ CORS ERROR\nError: ${error.message}`;
+                resultDiv.classList.add('error');
+            }
+        }
+
+        // Auto-run health check on load
+        window.onload = () => {
+            testHealthEndpoint();
+        };
+    </script>
+</body>
+</html>
