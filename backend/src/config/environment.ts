@@ -89,7 +89,7 @@ const config: Config = {
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   
   // Security
-  CORS_ORIGINS: process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000',
+  CORS_ORIGINS: process.env.CORS_ORIGINS || 'https://foto-video-creative.hafarnas-projects.vercel.app,http://localhost:5173,http://localhost:3000',
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
   
