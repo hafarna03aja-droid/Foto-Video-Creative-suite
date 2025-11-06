@@ -93,23 +93,26 @@ app.use('*', (req, res) => {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received. Shutting down gracefully...');
-  process.exit(0);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = config.PORT || 3001;
+  
+  // Graceful shutdown for local development
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM received. Shutting down gracefully...');
+    process.exit(0);
+  });
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received. Shutting down gracefully...');
-  process.exit(0);
-});
+  process.on('SIGINT', () => {
+    logger.info('SIGINT received. Shutting down gracefully...');
+    process.exit(0);
+  });
 
-const PORT = config.PORT || 3001;
-
-app.listen(PORT, () => {
-  logger.info(`🚀 Foto Video Creative Suite Backend running on port ${PORT}`);
-  logger.info(`📝 Environment: ${config.NODE_ENV}`);
-  logger.info(`🔒 CORS Origins: ${config.CORS_ORIGINS}`);
-});
+  app.listen(PORT, () => {
+    logger.info(`🚀 Foto Video Creative Suite Backend running on port ${PORT}`);
+    logger.info(`📝 Environment: ${config.NODE_ENV}`);
+    logger.info(`🔒 CORS Origins: ${config.CORS_ORIGINS}`);
+  });
+}
 
 export default app;

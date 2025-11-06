@@ -1,20 +1,45 @@
-# Deployment Guide untuk Vercel
+# 🚀 Production Deployment Guide - Foto Video Creative Suite
 
-## Persiapan Deploy
+## 🎯 Quick Start
 
-### 1. File Konfigurasi
-File berikut telah disiapkan untuk deployment:
-- `vercel.json` - Konfigurasi Vercel
-- `.env.example` - Template environment variables
-- `.gitignore` - Updated dengan entry Vercel
+### Automated Deployment (Recommended)
+```powershell
+# Run the automated deployment script
+.\deploy-ultra-simple.ps1
+```
 
-### 2. Environment Variables
-Sebelum deploy, pastikan Anda memiliki:
-- **GEMINI_API_KEY**: API key dari Google Gemini
+### Manual Deployment Steps
+1. **Deploy Backend**: `cd backend && vercel --prod`
+2. **Update Frontend Environment** with backend URL
+3. **Deploy Frontend**: `vercel --prod`
 
-## Cara Deploy ke Vercel
+## 📋 Prerequisites
 
-### Option 1: Deploy via GitHub (Recommended)
+- Node.js (version 18+)
+- npm package manager
+- Vercel CLI (auto-installed by script)
+- Google Gemini API key
+
+## 🛠️ Automated Deployment Script
+
+The `deploy-ultra-simple.ps1` script provides a complete deployment workflow:
+
+**Features:**
+- ✅ Validates all prerequisites
+- ✅ Builds backend TypeScript
+- ✅ Builds frontend React app
+- ✅ Sets up environment files
+- ✅ Installs Vercel CLI
+- ✅ Provides deployment guidance
+
+**Usage:**
+```powershell
+.\deploy-ultra-simple.ps1
+```
+
+## 🔧 Manual Deployment Process
+
+### Step 1: Environment Setup
 
 1. **Push ke GitHub Repository**
    ```bash

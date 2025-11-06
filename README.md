@@ -42,16 +42,47 @@ A modern web application that integrates Google Gemini's power to create text, i
    npm run dev
    ```
 
-## Deploy to Vercel
+## 🚀 Production Deployment
 
-### Quick Deploy
+### Automated Deployment Script
+```powershell
+# Run the automated deployment script
+.\deploy-ultra-simple.ps1
+```
+
+This script will:
+- ✅ Check all prerequisites (Node.js, npm, Vercel CLI)
+- ✅ Build backend with TypeScript compilation
+- ✅ Build frontend with Vite production optimization
+- ✅ Prepare environment files
+- ✅ Guide you through deployment steps
+
+### Manual Vercel Deploy
+
+#### Backend Deployment:
+1. Deploy backend API:
+   ```bash
+   cd backend
+   vercel --prod
+   ```
+2. Copy the backend URL from Vercel output
+
+#### Frontend Deployment:
+1. Update environment with backend URL:
+   ```bash
+   # Edit .env.local
+   VITE_API_BASE_URL=https://your-backend-url.vercel.app
+   ```
+2. Build and deploy frontend:
+   ```bash
+   npm run build
+   vercel --prod
+   ```
+
+### Quick Deploy Button
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/hafarna03aja-droid/Foto-Video-Creative-suite)
 
-### Manual Deploy
-1. Fork/clone this repository
-2. Push to your GitHub repository
-3. Connect to [Vercel](https://vercel.com)
-4. Add environment variable `GEMINI_API_KEY` in Vercel dashboard
-5. Deploy automatically
+### 🌐 **Live Demo**
+**✨ Access the application at: https://foto-video-creative.hafarnas-projects.vercel.app ✨**
 
 📖 **Detailed deployment guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md)

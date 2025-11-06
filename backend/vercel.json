@@ -1,24 +1,18 @@
 {
   "version": 2,
-  "name": "foto-video-creative-suite-backend",
   "builds": [
     {
-      "src": "dist/server.js",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/server.js"
+      "dest": "/dist/index.js"
     }
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "dist/server.js": {
-      "maxDuration": 30
-    }
   }
 }

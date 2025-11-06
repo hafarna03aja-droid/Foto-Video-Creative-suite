@@ -1,5 +1,12 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const getApiBaseUrl = () => {
+  try {
+    return (import.meta as any)?.env?.VITE_API_BASE_URL || 'https://backend.hafarnas-projects.vercel.app/api';
+  } catch {
+    return 'https://backend.hafarnas-projects.vercel.app/api';
+  }
+};
+const API_BASE_URL = getApiBaseUrl();
 
 // Response interfaces
 interface ApiResponse<T = any> {
@@ -27,6 +34,7 @@ interface GenerationResponse {
   audioUrl?: string;
   promptTokens?: number;
   completionTokens?: number;
+  placeholder?: string;
 }
 
 // Auth token management
@@ -346,7 +354,7 @@ export class BackendService {
 
   // User methods
   static async getUserProfile(): Promise<any> {
-    const response = await ApiClient.get('/user/profile');
+    const response = await ApiClient.get<{ user: any }>('/user/profile');
     
     if (!response.success) {
       throw new Error(response.error || 'Failed to get user profile');
@@ -356,7 +364,7 @@ export class BackendService {
   }
 
   static async updateUserProfile(updates: any): Promise<any> {
-    const response = await ApiClient.put('/user/profile', updates);
+    const response = await ApiClient.put<{ user: any }>('/user/profile', updates);
     
     if (!response.success) {
       throw new Error(response.error || 'Failed to update profile');

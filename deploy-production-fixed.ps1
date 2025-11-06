@@ -46,6 +46,7 @@ function Test-Requirements {
             Write-Error "Node.js 18 or higher is required. Current: $nodeVersion"
             exit 1
         }
+        Write-Host "Node.js version: $nodeVersion" -ForegroundColor Green
     }
     catch {
         Write-Error "Node.js is not installed or not in PATH"
@@ -54,7 +55,8 @@ function Test-Requirements {
     
     # Check npm
     try {
-        npm --version | Out-Null
+        $npmVersion = npm --version
+        Write-Host "npm version: $npmVersion" -ForegroundColor Green
     }
     catch {
         Write-Error "npm is not installed or not in PATH"
@@ -63,7 +65,8 @@ function Test-Requirements {
     
     # Check Git
     try {
-        git --version | Out-Null
+        $gitVersion = git --version
+        Write-Host "Git version: $gitVersion" -ForegroundColor Green
     }
     catch {
         Write-Error "Git is not installed or not in PATH"
@@ -92,7 +95,7 @@ function Setup-Environment {
         if (Test-Path "backend\.env.example") {
             Write-Warning "Backend .env file not found. Creating from example..."
             Copy-Item "backend\.env.example" "backend\.env"
-            Write-Warning "Please edit backend\.env with your production values (GEMINI_API_KEY, etc.)"
+            Write-Warning "Please edit backend\.env with your production values"
             Write-Host "Required variables: GEMINI_API_KEY, JWT_SECRET, JWT_REFRESH_SECRET" -ForegroundColor Yellow
             
             # Prompt for essential values
@@ -113,12 +116,7 @@ function Setup-Environment {
     # Frontend environment setup
     if (!(Test-Path ".env.local")) {
         Write-Warning "Frontend .env.local file not found. Creating..."
-        $envContent = @"
-# Frontend Environment Variables
-VITE_API_BASE_URL=http://localhost:3001/api
-VITE_APP_NAME=Foto Video Creative Suite
-VITE_VERSION=1.0.0
-"@
+        $envContent = "# Frontend Environment Variables`nVITE_API_BASE_URL=http://localhost:3001/api`nVITE_APP_NAME=Foto Video Creative Suite`nVITE_VERSION=1.0.0"
         $envContent | Out-File -FilePath ".env.local" -Encoding UTF8
         Write-Success "Created .env.local (will be updated with backend URL during deployment)"
     } else {
@@ -231,7 +229,7 @@ function Deploy-Backend {
         Write-Host "Note: You may need to authenticate with Vercel if this is your first deployment"
         
         # Deploy to Vercel with better error handling
-        $deployOutput = vercel --prod --yes 2>&1
+        $deployOutput = vercel --prod --yes 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) { 
             Write-Error "Vercel deployment failed: $deployOutput"
             throw "Vercel deployment failed" 
@@ -240,9 +238,9 @@ function Deploy-Backend {
         Write-Success "Backend deployed successfully"
         
         # Extract URL from deployment output
-        $urlMatch = $deployOutput | Select-String -Pattern "https://.*\.vercel\.app" | Select-Object -First 1
-        if ($urlMatch) {
-            $script:BackendUrl = $urlMatch.Matches[0].Value -replace "https://", ""
+        $urlPattern = "https://[\w\-]+\.vercel\.app"
+        if ($deployOutput -match $urlPattern) {
+            $script:BackendUrl = $matches[0] -replace "https://", ""
             Write-Host "Backend URL: https://$($script:BackendUrl)" -ForegroundColor $Green
         } else {
             Write-Warning "Could not extract backend URL from deployment output"
@@ -266,12 +264,7 @@ function Deploy-Frontend {
         # Update frontend environment with backend URL if available
         if ($script:BackendUrl) {
             Write-Host "Updating frontend environment with backend URL: https://$($script:BackendUrl)"
-            $envContent = @"
-# Frontend Environment Variables (Production)
-VITE_API_BASE_URL=https://$($script:BackendUrl)/api
-VITE_APP_NAME=Foto Video Creative Suite
-VITE_VERSION=1.0.0
-"@
+            $envContent = "# Frontend Environment Variables (Production)`nVITE_API_BASE_URL=https://$($script:BackendUrl)/api`nVITE_APP_NAME=Foto Video Creative Suite`nVITE_VERSION=1.0.0"
             $envContent | Out-File -FilePath ".env.local" -Encoding UTF8
             
             Write-Host "Rebuilding frontend with new backend URL..."
@@ -291,7 +284,7 @@ VITE_VERSION=1.0.0
         Write-Host "Deploying frontend to Vercel..."
         
         # Deploy to Vercel with better error handling
-        $deployOutput = vercel --prod --yes 2>&1
+        $deployOutput = vercel --prod --yes 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) { 
             Write-Error "Vercel deployment failed: $deployOutput"
             throw "Vercel deployment failed" 
@@ -300,9 +293,9 @@ VITE_VERSION=1.0.0
         Write-Success "Frontend deployed successfully"
         
         # Extract URL from deployment output
-        $urlMatch = $deployOutput | Select-String -Pattern "https://.*\.vercel\.app" | Select-Object -First 1
-        if ($urlMatch) {
-            $script:FrontendUrl = $urlMatch.Matches[0].Value -replace "https://", ""
+        $urlPattern = "https://[\w\-]+\.vercel\.app"
+        if ($deployOutput -match $urlPattern) {
+            $script:FrontendUrl = $matches[0] -replace "https://", ""
             Write-Host "Frontend URL: https://$($script:FrontendUrl)" -ForegroundColor $Green
         } else {
             Write-Warning "Could not extract frontend URL from deployment output"
@@ -429,7 +422,9 @@ function Main {
 
 # Handle Ctrl+C gracefully
 try {
-    Main
+    if ($MyInvocation.InvocationName -ne '.') {
+        Main
+    }
 }
 catch {
     Write-Host ""
