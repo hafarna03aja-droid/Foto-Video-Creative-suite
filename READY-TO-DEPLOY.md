@@ -26,7 +26,7 @@ git push origin main
 4. **Import**: repository `Foto-Video-Creative-suite`
 5. **Configure**: Environment Variables
    - Name: `GEMINI_API_KEY`
-   - Value: `AIzaSyDPqJ3EDiG0zywe-wZJ-umapp1JYFsOqro`
+   - Value: `YOUR_GEMINI_API_KEY_HERE` (Get from https://aistudio.google.com/app/apikey)
    - Environment: Production + Preview + Development
 6. **Click**: "Deploy"
 

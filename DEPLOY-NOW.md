@@ -31,7 +31,7 @@ Sebelum deploy, tambahkan environment variable:
 1. **Scroll down** ke bagian "Environment Variables"
 2. **Add Variable**:
    - **Name**: `GEMINI_API_KEY`
-   - **Value**: `AIzaSyDPqJ3EDiG0zywe-wZJ-umapp1JYFsOqro`
+   - **Value**: `YOUR_GEMINI_API_KEY_HERE` (Get from https://aistudio.google.com/app/apikey)
    - **Environments**: ✅ Production ✅ Preview ✅ Development
 
 ### Step 6: Deploy!

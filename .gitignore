@@ -27,3 +27,23 @@ dist-ssr
 
 # Vercel
 .vercel
+
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.env*.local
+backend/.env
+backend/.env.local
+backend/.env.production
+backend/.env.development
+backend/.env.test
+backend/.env.check
+backend/.env.current
+
+# API Keys and Secrets
+**/GEMINI_API_KEY*
+**/*secret*
+**/*token*

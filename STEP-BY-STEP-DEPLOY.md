@@ -29,7 +29,7 @@ Build and Output Settings: (expand if needed)
 
 Klik **"Add"** dan masukkan:
 - **NAME**: `GEMINI_API_KEY`
-- **VALUE**: `AIzaSyDPqJ3EDiG0zywe-wZJ-umapp1JYFsOqro`
+- **VALUE**: `YOUR_GEMINI_API_KEY_HERE` (Get from https://aistudio.google.com/app/apikey)
 - **ENVIRONMENTS**: 
   - ✅ Production
   - ✅ Preview  
